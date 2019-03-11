@@ -40,14 +40,12 @@
     </nav>
 
     <div class="content" id="Search">
-        Home page
-
-        <input type="text" id="subject" placeholder="Enter a subject">
+        <h3>Search for graffiti removal requests by ward and status</h3>
+        <input type="number" id="ward" placeholder="Enter a ward number" min=0>
         <br>
-        <textarea rows="5" cols="40"></textarea>
+        <input type="text" id="status" placeholder="Enter a status">
         <br>
         <button id="searchButton">Search</button>
-
     </div>
     <div class="content" id="List">
         This is screen 2
@@ -62,6 +60,8 @@
 
     <script>
         $(document).ready(function() {
+            var api = "https://data.cityofchicago.org/resource/cdmx-wzbz.json?$limit=500";
+
             $("#Search").show();
 
             function hideScreens() {
@@ -75,7 +75,19 @@
             });
 
             $("#searchButton").on("click", function() {
+                $("#Search").hide();
+                $("List").show();
 
+                var wardnum = $("#ward").val();
+                var status = encodeURIComponent($("#status").val());
+                var url = api;
+                if (wardnum.length!=0) {
+                  url += "&ward=" + wardnum;
+                }
+                if (status.length!=0) {
+                  url += "&status=" + status;
+                }
+                console.log(url);
             });
         });
     </script>
