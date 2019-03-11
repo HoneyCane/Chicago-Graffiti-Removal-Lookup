@@ -18,11 +18,10 @@
           display: none;
         }
         #googleMap {
-          height: 95%;
+          height: 500px;
           width: 100%;
         }
     </style>
-
 </head>
 
 <body>
@@ -61,7 +60,7 @@
         <div id="cards"></div>
     </div>
     <div class="content" id="Map">
-        <div id="googleMap"></div>
+      <div id="googleMap"></div>
     </div>
     <div class="content" id="About">
         <h5>About this App</h5>
@@ -89,12 +88,15 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 
     <script>
+      var map;
+      var markers = [];
+
       function initMap() {
         var mapProp= {
           center:new google.maps.LatLng(41.8781,-87.6298),
-          zoom:11,
+          zoom:13,
         };
-        var map = new google.maps.Map(document.getElementById("googleMap"), mapProp);
+        map = new google.maps.Map(document.getElementById("googleMap"), mapProp);
       }
 
         $(document).ready(function() {
@@ -116,6 +118,10 @@
                 hideScreens();
                 $("#List").show();
                 $("#cards").empty();
+                for (var i = 0; i < markers.length; i++) {
+                  markers[i].setMap(null);
+                }
+                markers = [];
 
                 var wardnum = $("#ward").val();
                 var status = encodeURIComponent($("#status").val());
@@ -131,17 +137,26 @@
                 $.get(url, function(response) {
                   $.each(response, function(i,v) {
                     var clone = $(".template").clone();
-                    clone.find(".card-text").text(
-                      "Address: " + v.street_address +
-                      ", Service Request Number: " + v.service_request_number +
-                      ", Where the graffiti is located: " + v.where_is_the_graffiti_located_ +
-                      ", Creation date: " + v.creation_date +
-                      ", Status: " + v.status +
-                      ", Completion date: " + v.completion_date);
+                    var details = "Address: " + v.street_address +
+                    ", Service Request Number: " + v.service_request_number +
+                    ", Where the graffiti is located: " + v.where_is_the_graffiti_located_ +
+                    ", Creation date: " + v.creation_date +
+                    ", Status: " + v.status +
+                    ", Completion date: " + v.completion_date;
+                    clone.find(".card-text").text(details);
                     clone.removeClass("template");
                     $("#cards").append(clone);
 
+                    var loc = {lat:parseFloat(v.latitude), lng: parseFloat(v.longitude)};
+                    var marker = new google.maps.Marker({position: loc, map: map});
+                    var infowindow = new google.maps.InfoWindow({
+                      content: details
+                    });
+                    markers.push(marker);
 
+                    marker.addListener('click', function() {
+                      infowindow.open(map, marker);
+                    });
                   });//each response parsing
                 });//get api call
             });//searchButton clicked
@@ -159,7 +174,9 @@
         }
     </script>
 
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCRWF8oO5qIc1IiFblEPvqF_XlNZfDrQC0&callback=initMap"></script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCRWF8oO5qIc1IiFblEPvqF_XlNZfDrQC0&callback=initMap">
+    </script>
 </body>
 
 </html>
