@@ -14,6 +14,9 @@
             display: none;
             margin: 1em;
         }
+        .template {
+          display: none;
+        }
     </style>
 
 </head>
@@ -35,6 +38,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="#Map">Map</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#About">About</a>
+                </li>
             </ul>
         </div>
     </nav>
@@ -48,10 +54,30 @@
         <button id="searchButton">Search</button>
     </div>
     <div class="content" id="List">
-        This is screen 2
+        <div id="cards"></div>
     </div>
     <div class="content" id="Map">
         This is screen 3
+    </div>
+    <div class="content" id="About">
+        <h5>About this App</h5>
+        <br>
+        <p>"Chicago Graffiti Removal Request" is a Progressive Web App to let people search for and <br>
+          map Graffiti Removal requests to the City's 311 system. The app could be used by <br>
+          city workers heading out to remove the graffiti or by users who want to search <br>
+          before entering a 311 service request.<br><br>
+          Results are shown in a list and map view.<br><br>
+          This was developed by Tian Zhou.<br>
+        </p>
+        <a href="https://github.com/HoneyCane/IT202-Project2">Check out the github repo!</a>
+    </div>
+
+    <div class="card template">
+      <div class="card-body">
+        <p class="card-text">
+          This is some text within a card body.
+        </p>
+      </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -75,8 +101,9 @@
             });
 
             $("#searchButton").on("click", function() {
-                $("#Search").hide();
-                $("List").show();
+                hideScreens();
+                $("#List").show();
+                $("#cards").empty();
 
                 var wardnum = $("#ward").val();
                 var status = encodeURIComponent($("#status").val());
@@ -88,8 +115,27 @@
                   url += "&status=" + status;
                 }
                 console.log(url);
-            });
-        });
+
+                $.get(url, function(response) {
+                  $.each(response, function(i,v) {
+                    var clone = $(".template").clone();
+                    clone.find(".card-text").text(
+                      "Address: " + v.street_address +
+                      ", Service Request Number: " + v.service_request_number +
+                      ", Where the graffiti is located: " + v.where_is_the_graffiti_located_ +
+                      ", Creation date: " + v.creation_date +
+                      ", Status: " + v.status +
+                      ", Completion date: " + v.completion_date);
+                    clone.removeClass("template");
+                    $("#cards").append(clone);
+
+
+                  });//each response parsing
+                });//get api call
+            });//searchButton clicked
+
+
+        });//document ready
     </script>
 
     <script>
